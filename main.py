@@ -110,6 +110,14 @@ def patch_client(client_id: int, client: ClientPatch, db: Session = Depends(get_
 @app.delete("/clients/{client_id}")
 def delete_client(client_id: int, db: Session = Depends(get_db)):
     db_client = db.get(Client, client_id)
+
+    assets = db.query(Asset).filter(Asset.client_id == client_id).first()
+
+    if assets:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete client, assets exist"
+        )
     if not db_client:
         raise HTTPException(status_code=404, detail="client not found")
 
